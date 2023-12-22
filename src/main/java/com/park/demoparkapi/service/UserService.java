@@ -1,8 +1,11 @@
 package com.park.demoparkapi.service;
 
 import com.park.demoparkapi.entity.User;
+import com.park.demoparkapi.exception.EntityNotFoundException;
+import com.park.demoparkapi.exception.UsernameUniqueViolationException;
 import com.park.demoparkapi.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,13 +19,17 @@ public class UserService {
 
     @Transactional /* Spring gerencia ciclo de vida da transação */
     public User save(User user) {
-        return userRepo.save(user);
+        try {
+            return userRepo.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new UsernameUniqueViolationException(String.format("User {%s} already registered.", user.getUsername()));
+        }
     }
 
     @Transactional(readOnly = true)
     public User getById(Long id) {
         return userRepo.findById(id).orElseThrow(
-                () -> new RuntimeException("Usuário não encontrado.")
+                () -> new EntityNotFoundException(String.format("User id=%s not found.", id))
         );
     }
 
