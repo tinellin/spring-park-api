@@ -2,6 +2,7 @@ package com.park.demoparkapi.service;
 
 import com.park.demoparkapi.entity.User;
 import com.park.demoparkapi.exception.EntityNotFoundException;
+import com.park.demoparkapi.exception.PasswordInvalidException;
 import com.park.demoparkapi.exception.UsernameUniqueViolationException;
 import com.park.demoparkapi.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -36,11 +37,11 @@ public class UserService {
     @Transactional()
     public User updatePassword(Long id, String password, String newPassword, String confirmNewPassword) {
 
-        if (!newPassword.equals(confirmNewPassword)) throw new RuntimeException("Incorrect new password.");
+        if (!newPassword.equals(confirmNewPassword)) throw new PasswordInvalidException("Incorrect new password.");
 
         User user = getById(id);
 
-        if(!user.getPassword().equals(password)) throw new RuntimeException("Your password not confer.");
+        if(!user.getPassword().equals(password)) throw new PasswordInvalidException("Your password not confer.");
 
         user.setPassword(password);
         return user;

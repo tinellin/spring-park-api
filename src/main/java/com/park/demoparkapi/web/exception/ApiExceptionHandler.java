@@ -1,6 +1,7 @@
 package com.park.demoparkapi.web.exception;
 
 import com.park.demoparkapi.exception.EntityNotFoundException;
+import com.park.demoparkapi.exception.PasswordInvalidException;
 import com.park.demoparkapi.exception.UsernameUniqueViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -45,5 +46,15 @@ public class ApiExceptionHandler {
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ErrorMessage(req, HttpStatus.UNPROCESSABLE_ENTITY, "Invalid field(s)", res));
+    }
+
+    @ExceptionHandler(PasswordInvalidException.class)
+    public ResponseEntity<ErrorMessage> passwordInvalidException(PasswordInvalidException ex, HttpServletRequest req) {
+        log.error("Api error - ", ex);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ErrorMessage(req, HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
 }
