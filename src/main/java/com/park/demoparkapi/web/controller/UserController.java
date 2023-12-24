@@ -64,11 +64,13 @@ public class UserController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "400", description = "Password does not match.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "422", description = "Invalid fields.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updatePassword(@PathVariable() Long id, @Valid @RequestBody() UserPasswordDto dto) {
+    public ResponseEntity<Void> updatePassword(@PathVariable() Long id, @Valid @RequestBody() UserPasswordDto dto) {
         User updatedUser = userService.updatePassword(id, dto.getPassword(), dto.getNewPassword(), dto.getConfirmNewPassword());
-        return ResponseEntity.ok(UserMapper.toDto(updatedUser));
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Get all users", description = "Resource to get all users.", responses = {
