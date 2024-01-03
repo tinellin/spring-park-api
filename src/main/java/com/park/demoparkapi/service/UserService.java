@@ -7,6 +7,7 @@ import com.park.demoparkapi.exception.UsernameUniqueViolationException;
 import com.park.demoparkapi.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +18,12 @@ import java.util.List;
 public class UserService {
 
     private final UserRepo userRepo;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional /* Spring gerencia ciclo de vida da transação */
     public User save(User user) {
         try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             return userRepo.save(user);
         } catch (DataIntegrityViolationException ex) {
             throw new UsernameUniqueViolationException(String.format("User {%s} already registered.", user.getUsername()));
@@ -41,14 +44,25 @@ public class UserService {
 
         User user = getById(id);
 
-        if(!user.getPassword().equals(password)) throw new PasswordInvalidException("Your password not confer.");
+        if(!passwordEncoder.matches(password, user.getPassword())) throw new PasswordInvalidException("Your password not confer.");
 
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         return user;
     }
 
     @Transactional(readOnly = true)
     public List<User> getAll() {
         return userRepo.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public User getByUsername(String username) {
+        return userRepo.findByUsername(username).orElseThrow(
+                () -> new EntityNotFoundException(String.format("User '%s' not found.", username))
+        );
+    }
+    @Transactional(readOnly = true)
+    public User.Role getRoleById(String username) {
+        return userRepo.findRoleByUsername(username);
     }
 }
