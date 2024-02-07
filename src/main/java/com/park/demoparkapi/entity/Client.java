@@ -1,7 +1,7 @@
 package com.park.demoparkapi.entity;
 
 import jakarta.persistence.*;
-
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,26 +15,24 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Getter() @Setter @NoArgsConstructor()
-@Entity()
-@Table(name = "users")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Entity
+@Table(name = "client")
 @EntityListeners(AuditingEntityListener.class)
-/* Implementamos Serializable, pois é uma boa prática */
-public class User implements Serializable {
-    @Id()
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+public class Client implements Serializable {
 
-    @Column(name = "username", nullable = false, unique = true, length = 100)
-    private String username;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
-    @Column(name = "password", nullable = false, length = 200)
-    private String password;
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 25)
-    private Role role = Role.ROLE_CLIENT;
+    @Column(name = "cpf", nullable = false, length = 11)
+    private String cpf;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     /* Representa o sistema de auditoria */
     @CreatedDate
@@ -53,27 +51,16 @@ public class User implements Serializable {
     @Column(name = "updated_by")
     private String updatedBy;
 
-    public enum Role {
-        ROLE_ADMIN, ROLE_CLIENT
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id);
+        Client client = (Client) o;
+        return id == client.id;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                '}';
     }
 }

@@ -13,14 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional /* Spring gerencia ciclo de vida da transação */
+    /* Spring gerencia ciclo de vida da transação */
+    @Transactional
     public User save(User user) {
         try {
             user.setPassword(passwordEncoder.encode(user.getPassword()));

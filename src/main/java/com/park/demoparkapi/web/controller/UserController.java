@@ -17,12 +17,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
 import java.util.List;
 @Tag(name = "Users", description = "goal: save, edit and get users")
-
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/v1/users")
@@ -39,9 +38,8 @@ public class UserController {
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
     @PostMapping()
-    /* ResponseEntity: encapsula um objeto e demais metadados (cabeçalho, resposta, etc) */
     public ResponseEntity<UserResponseDto> create(@Valid @RequestBody() UserCreateDto createDto) {
-        User response = userService.save(UserMapper.toUsuario(createDto));
+        User response = userService.save(UserMapper.toUser(createDto));
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toDto(response));
     }
 
@@ -52,24 +50,23 @@ public class UserController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') OR ( hasRole('CLIENT') AND #id == authentication.principal.id )") // comentar isso dps
     public ResponseEntity<UserResponseDto> getById(@PathVariable() Long id) {
         User user = userService.getById((id));
         return ResponseEntity.ok(UserMapper.toDto(user));
     }
 
     @Operation(summary = "Update user password", description = "Resource to update user password.", responses = {
-            @ApiResponse(responseCode = "204", description = "Resource successfully updated.",
-                    content = @Content(mediaType = "application/json", schema = @Schema())),
-            @ApiResponse(responseCode = "404", description = "Resource not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "204", description = "Resource successfully updated."),
             @ApiResponse(responseCode = "400", description = "Password does not match.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "422", description = "Invalid fields.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT') AND ( #id == authentication.principal.id )")
     public ResponseEntity<Void> updatePassword(@PathVariable() Long id, @Valid @RequestBody() UserPasswordDto dto) {
-        User updatedUser = userService.updatePassword(id, dto.getPassword(), dto.getNewPassword(), dto.getConfirmNewPassword());
+        userService.updatePassword(id, dto.getPassword(), dto.getNewPassword(), dto.getConfirmNewPassword());
         return ResponseEntity.noContent().build();
     }
 
@@ -78,6 +75,7 @@ public class UserController {
                     content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserResponseDto.class)))),
     })
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> getAll() {
         List<User> users = userService.getAll();
         return ResponseEntity.ok(UserMapper.toListDto(users));
