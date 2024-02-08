@@ -2,6 +2,7 @@ package com.park.demoparkapi.web.controller;
 
 import com.park.demoparkapi.entity.User;
 import com.park.demoparkapi.service.UserService;
+import com.park.demoparkapi.web.dto.ClientResponseDto;
 import com.park.demoparkapi.web.dto.UserCreateDto;
 import com.park.demoparkapi.web.dto.UserPasswordDto;
 import com.park.demoparkapi.web.dto.UserResponseDto;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,26 +31,36 @@ public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "Create a new user", description = "Resource to create a new user", responses = {
-            @ApiResponse(responseCode = "201", description = "Resource created successfully.",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class))),
-            @ApiResponse(responseCode = "409", description = "User already registered.",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "422", description = "Resources not processed by invalid input data.",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
-    })
+    @Operation(summary = "Criar um novo cliente", description = "Recurso para criar um novo cliente vinculado a um usuário cadastrado. " +
+                    "Requisição exige uso de um bearer token. Acesso restrito a Role='CLIENTE'",
+            security = @SecurityRequirement(name = "security"),
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Recurso criado com sucesso",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ClientResponseDto.class))),
+                    @ApiResponse(responseCode = "409", description = "Cliente CPF já possui cadastro no sistema",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class))),
+                    @ApiResponse(responseCode = "422", description = "Recurso não processado por falta de dados ou dados inválidos",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class))),
+                    @ApiResponse(responseCode = "403", description = "Recurso não permito ao perfil de ADMIN",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class)))
+            })
     @PostMapping()
     public ResponseEntity<UserResponseDto> create(@Valid @RequestBody() UserCreateDto createDto) {
         User response = userService.save(UserMapper.toUser(createDto));
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toDto(response));
     }
 
-    @Operation(summary = "Get user by id", description = "Resource to get user by id", responses = {
-            @ApiResponse(responseCode = "200", description = "Resource successfully retrieved.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class))),
-            @ApiResponse(responseCode = "404", description = "Resource not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-    })
+    @Operation(summary = "Localizar um cliente", description = "Recurso para localizar um cliente pelo ID. " +
+            "Requisição exige uso de um bearer token. Acesso restrito a Role='ADMIN'",
+            security = @SecurityRequirement(name = "security"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Recurso localizado com sucesso",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ClientResponseDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Cliente não encontrado",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class))),
+                    @ApiResponse(responseCode = "403", description = "Recurso não permito ao perfil de CLIENTE",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class)))
+            })
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') OR ( hasRole('CLIENT') AND #id == authentication.principal.id )") // comentar isso dps
     public ResponseEntity<UserResponseDto> getById(@PathVariable() Long id) {

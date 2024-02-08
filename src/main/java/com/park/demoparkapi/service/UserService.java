@@ -4,7 +4,7 @@ import com.park.demoparkapi.entity.User;
 import com.park.demoparkapi.exception.EntityNotFoundException;
 import com.park.demoparkapi.exception.PasswordInvalidException;
 import com.park.demoparkapi.exception.UsernameUniqueViolationException;
-import com.park.demoparkapi.repository.UserRepo;
+import com.park.demoparkapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     /* Spring gerencia ciclo de vida da transação */
@@ -25,7 +25,7 @@ public class UserService {
     public User save(User user) {
         try {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-            return userRepo.save(user);
+            return userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
             throw new UsernameUniqueViolationException(String.format("User {%s} already registered.", user.getUsername()));
         }
@@ -33,7 +33,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User getById(Long id) {
-        return userRepo.findById(id).orElseThrow(
+        return userRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException(String.format("User id=%s not found.", id))
         );
     }
@@ -53,17 +53,17 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<User> getAll() {
-        return userRepo.findAll();
+        return userRepository.findAll();
     }
 
     @Transactional(readOnly = true)
     public User getByUsername(String username) {
-        return userRepo.findByUsername(username).orElseThrow(
+        return userRepository.findByUsername(username).orElseThrow(
                 () -> new EntityNotFoundException(String.format("User '%s' not found.", username))
         );
     }
     @Transactional(readOnly = true)
     public User.Role getRoleById(String username) {
-        return userRepo.findRoleByUsername(username);
+        return userRepository.findRoleByUsername(username);
     }
 }

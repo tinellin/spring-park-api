@@ -17,7 +17,7 @@ import java.util.Objects;
 
 @Getter() @Setter @NoArgsConstructor()
 @Entity()
-@Table(name = "users")
+@Table(name = "Users")
 @EntityListeners(AuditingEntityListener.class)
 /* Implementamos Serializable, pois é uma boa prática */
 public class User implements Serializable {
