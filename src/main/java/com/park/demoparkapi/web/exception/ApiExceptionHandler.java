@@ -1,9 +1,6 @@
 package com.park.demoparkapi.web.exception;
 
-import com.park.demoparkapi.exception.CpfUniqueViolationException;
-import com.park.demoparkapi.exception.EntityNotFoundException;
-import com.park.demoparkapi.exception.PasswordInvalidException;
-import com.park.demoparkapi.exception.UsernameUniqueViolationException;
+import com.park.demoparkapi.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -38,7 +35,7 @@ public class ApiExceptionHandler {
                 .body(new ErrorMessage(req, HttpStatus.FORBIDDEN, ex.getMessage()));
     }
 
-    @ExceptionHandler({UsernameUniqueViolationException.class, CpfUniqueViolationException.class})
+    @ExceptionHandler({UsernameUniqueViolationException.class, CpfUniqueViolationException.class, CodeUniqueViolationException.class})
     public ResponseEntity<ErrorMessage> usernameUniqueViolationException(RuntimeException ex, HttpServletRequest req)
     {
         log.error("Api error - ", ex);

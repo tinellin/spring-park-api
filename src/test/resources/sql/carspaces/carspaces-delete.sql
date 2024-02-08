@@ -1,0 +1,2 @@
+DELETE FROM Car_Space;
+DELETE FROM Users;
