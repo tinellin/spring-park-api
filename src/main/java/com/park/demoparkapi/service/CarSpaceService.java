@@ -4,7 +4,6 @@ import com.park.demoparkapi.entity.CarSpace;
 import com.park.demoparkapi.exception.CodeUniqueViolationException;
 import com.park.demoparkapi.exception.EntityNotFoundException;
 import com.park.demoparkapi.repository.CarSpaceRepository;
-import com.park.demoparkapi.web.dto.CarSpaceResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -31,6 +30,13 @@ public class CarSpaceService {
     public CarSpace findByCode(String code) {
         return carSpaceRepo.findByCode(code).orElseThrow(
                 () -> new EntityNotFoundException(String.format("Vaga com código %s não foi encontrada.", code))
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public CarSpace getFreeCarSpace() {
+        return carSpaceRepo.findFirstByStatus(CarSpace.StatusCarSpace.FREE).orElseThrow(
+                () -> new EntityNotFoundException("Nenhuma vaga livre foi encontrada.")
         );
     }
 }

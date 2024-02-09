@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface CarSpaceRepository extends JpaRepository<CarSpace, Long> {
     Optional<CarSpace> findByCode(String code);
+
+    Optional<CarSpace> findFirstByStatus(CarSpace.StatusCarSpace statusCarSpace);
 }

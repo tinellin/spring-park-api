@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +37,7 @@ public class CarSpaceController {
         responses = {
             @ApiResponse(responseCode = "200", description = "Recurso criado com sucesso.", headers = @Header(name = HttpHeaders.LOCATION, description = "URL do recurso criado")),            @ApiResponse(responseCode = "403", description = "Recurso não permito ao perfil de CLIENT",
                     content = @Content(mediaType = " application/json;charset=UTF-8",
-                            schema = @Schema(implementation = ErrorMessage.class)),
+                            schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(
                     responseCode = "409", description = "Vaga já cadastrada",
                     content = @Content(mediaType = " application/json;charset=UTF-8",
@@ -47,7 +46,7 @@ public class CarSpaceController {
             @ApiResponse(responseCode = "422", description = "Recurso não processado por falta de dados ou dados inválidos",
                         content = @Content(mediaType = " application/json;charset=UTF-8",
                         schema = @Schema(implementation = ErrorMessage.class)
-            )))
+            ))
         }
     )
     @PostMapping
